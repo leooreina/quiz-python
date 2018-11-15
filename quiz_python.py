@@ -49,7 +49,7 @@ frases_lacunas_respostas_por_dificuldade = {
 }
 
 
-# Boas vindas e início de jogo:
+# Boas vindas, início do jogo e instruções:
 
 
 print('\033[35m-\033[m'*15, end="")
@@ -68,31 +68,49 @@ print('\033[34m BOA SORTE!\033[m ', '\033[35m-\033[m'*15, '\n')
 
 # Usuário seleciona a dificuldade:
 
-
 dificuldades = ['FACIL', 'MEDIO', 'DIFICIL']
-nivel = str(input(f'''Por favor, escolha uma dificuldade para o quiz:
+
+
+def get_dificuldade():
+    """Pergunta a dificuldade para o usuário que, caso
+    não esteja nas possíveis, retornará a própria função.
+    Se a dificuldade selecionada estiver nas possíveis
+    retornará a dificuldade selecionada.
+    """
+    dificuldade = str(input(f'''Por favor, escolha uma dificuldade para o quiz:
 \n        \033[32m|{dificuldades[0]:>8}|\033[m
 \n        \033[33m|{dificuldades[1]:>8}|\033[m
 \n        \033[31m|{dificuldades[2]:>8}|\033[m \n''')).upper().strip()
-while nivel not in dificuldades:
-    print('\nDificuldade inválida, tente novamente.\n')
-    nivel = str(input(f'''Por favor, escolha uma dificuldade para o quiz:
-    \n        \033[32m|{dificuldades[0]:>8}|\033[m
-    \n        \033[33m|{dificuldades[1]:>8}|\033[m
-    \n        \033[31m|{dificuldades[2]:>8}|\033[m \n''')).upper().strip()
-print(f'\nVocê selecionou a dificuldade \033[34m {nivel}! \033[m')
+    if dificuldade not in dificuldades:
+        print("Valor inválido! Tente novamente.")
+        return get_dificuldade()
+    else:
+        print(f'\nVocê selecionou a dificuldade \033[34m {dificuldade}! \033[m')
+        return dificuldade
+
+
+nivel = get_dificuldade()
 
 
 # Usuário selecionando o número de tentativas:
 
+def get_tentativas():
+    """Pergunta o número de tentativas por lacuna que o
+    usuário deseja e retorna o número dado.
+    """
+    tentativas = int(input('\n\033[35mCom quantas tentativas por lacuna você deseja jogar?\033[m\n'))
+    return tentativas
 
-num_tentativas = int(input('\n\033[35mCom quantas tentativas por lacuna você deseja jogar?\033[m\n'))
+
+num_tentativas = get_tentativas()
 
 
 # Localizando as frases, lacunas e respostas_certas de acordo com o nível escolhido.
 
-
 def procura_frase_lacunas_respostas_dicionario():
+    """Esta função retorna a frase, as lacunas e as respostas
+    correspondentes para o nível selecionado pelo usuário.
+    """
     frase = frases_lacunas_respostas_por_dificuldade[nivel]['frase']
     lacunas = frases_lacunas_respostas_por_dificuldade[nivel]['lacunas']
     respostas_certas = frases_lacunas_respostas_por_dificuldade[nivel]['respostas_certas']
@@ -101,8 +119,11 @@ def procura_frase_lacunas_respostas_dicionario():
 
 # Divide a frase:
 
-
 def dividir_frase():
+    """Esta função chama a função 'procura
+    _frase_lacunas_respostas_dicionario()',
+    divide a frase e retorna a frase dividida.
+    """
     frase, lacunas, respostas_certas = procura_frase_lacunas_respostas_dicionario()
     frase_dividida = frase.split(' ')
     return frase_dividida
@@ -110,8 +131,15 @@ def dividir_frase():
 
 # Mostra a frase para o usuário:
 
-
 def linha_e_frase(mensagem):
+    """Esta função serve para imprimir
+    uma mensagem (como a frase com as lacunas)
+    entre duas linhas(uma na parte superior e
+    outra na parte inferior).
+
+    Argumento: mensagem - qualquer mensagem que
+    pode ser imprimida.
+    """
     print('\033[35m-\033[m'*80)
     print(f'\033[34m{mensagem}\033[m')
     print('\033[35m-\033[m'*80)
@@ -121,8 +149,31 @@ def linha_e_frase(mensagem):
 # Se o número de respostas erradas for igual ao número de tentativas, o jogo encerra e o usuário perde.
 
 def esqueleto_jogo():
+    """ 1) chama as funções:
+    'procura_frase_lacunas_respostas_dicionario()'
+    'dividir_frase()'
+
+    2) Em seguida, verifica por cada lacuna a resposta
+    do usuário. Caso esteja errada, soma um ao
+    número de respostas erradas. Se o erro continuar
+    acontecendo até atingir o número de tentativas
+    selecionadas pelo usuário, o programa finaliza.
+
+    3) Se as respostas dadas pelo usuário forem corretas,
+    para cada lacuna será imprimido uma mensagem de resposta
+    certa e será feito os passos a seguir:
+
+    'posicao' -- acha a posição da lacuna na frase dividida
+    'excluindo' -- exclui a lacuna na posicao
+    'inserindo' -- insere a resposta certa na posicao
+    'juntando' -- junta a frase dividida
+    Por fim, imprime a frase com a lacuna preenchida para o
+    usuário.
+    """
+    # 1):
     frase, lacunas, respostas_certas = procura_frase_lacunas_respostas_dicionario()
     frase_dividida = dividir_frase()
+    # 2):
     for espaco in range(0, len(lacunas)):
         resposta = str(input(f'Qual a resposta para {lacunas[espaco]}?'))
         respostas_erradas = 0
@@ -133,6 +184,7 @@ def esqueleto_jogo():
                 sys.exit()
             linha_e_frase(mensagem='     \033[0;31mRESPOSTA ERRADA! Tente novamente.\033[m     ')
             resposta = str(input(f'Você tem mais {num_tentativas - respostas_erradas} tentativa(s). Qual a resposta para {lacunas[espaco]}?'))
+        # 3):
         linha_e_frase(mensagem='     \033[0;36mRESPOSTA CORRETA!\033[m     ')
         posicao = frase_dividida.index(lacunas[espaco])
         excluindo = frase_dividida.pop(posicao)
@@ -143,15 +195,17 @@ def esqueleto_jogo():
 
 # Ao completar todas as lacunas, o usuário termina o quiz e mostra mensagem final:
 
-
 def game_over():
+    """Chama a função linha_e_frase para imprimir a mensagem
+    final do jogo.
+    """
     linha_e_frase(mensagem='VOCÊ CONSEGUIU! Fim de jogo. Volte sempre.')
 
 
 # Roda o jogo:
 
-
 def rodando_jogo():
+    """Chama as funções importantes para rodar o jogo."""
     frase, lacunas, respostas_certas = procura_frase_lacunas_respostas_dicionario()
     linha_e_frase(mensagem=frase)
     esqueleto_jogo()
